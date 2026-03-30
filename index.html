@@ -1,0 +1,1426 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-id="th-modified">MDIHUB Kids - Future Coders Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&amp;family=Poppins:wght@400;700&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff00;
+            --dark-space: #0a0a20;
+            --accent-purple: #b57edc;
+        }
+        
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-space);
+            color: white;
+            margin: 0;
+            overflow-x: hidden;
+            padding-top: 90px;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 255, 0.1) 0%, transparent 20%);
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+        /* Constellation canvas */
+        #constellation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+        
+        header {
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            margin: 0;
+            background: linear-gradient(90deg, var(--neon-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .logo span {
+            color: var(--neon-green);
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px var(--neon-blue); }
+            to { text-shadow: 0 0 20px var(--accent-purple), 0 0 30px var(--neon-blue); }
+        }
+        
+        @keyframes float {
+            0% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-15px); }
+            100% { transform: translateX(-50%) translateY(0px); }
+        }
+        
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 40, 0.6);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid rgba(0,255,255,0.15);
+        }
+
+        .main-nav { text-align: center; margin: 10px 0 20px; }
+        .main-nav ul { list-style: none; padding: 0; margin: 0; }
+        .main-nav li { display: inline-block; margin: 6px 8px; }
+        .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            display: inline-block;
+            background: rgba(10, 10, 40, 0.7);
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            padding: 8px 15px;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .nav-link:hover { background: var(--neon-blue); color: var(--dark-space); box-shadow: 0 0 15px var(--neon-blue); }
+        /* Mobile menu trigger (hamburger) */
+        .menu-trigger {
+            position: absolute;
+            top: 18px;
+            right: 16px;
+            width: 42px;
+            height: 42px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 1px solid rgba(0,255,255,0.25);
+            background: rgba(10,10,40,0.6);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .menu-trigger:hover { box-shadow: 0 0 12px rgba(0,255,255,0.35); transform: translateY(-1px); }
+        .menu-trigger .bar {
+            position: relative;
+            width: 22px;
+            height: 2px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 8px rgba(0,255,255,0.6);
+        }
+        .menu-trigger .bar::before,
+        .menu-trigger .bar::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 22px;
+            height: 2px;
+            background: var(--neon-blue);
+            transition: transform 0.3s cubic-bezier(.55,0,.1,1), opacity 0.2s ease;
+        }
+        .menu-trigger .bar::before { top: -7px; }
+        .menu-trigger .bar::after { top: 7px; }
+        /* X state */
+        body.menu-open .menu-trigger .bar { background: transparent; box-shadow: none; }
+        body.menu-open .menu-trigger .bar::before { transform: translateY(7px) rotate(45deg); }
+        body.menu-open .menu-trigger .bar::after { transform: translateY(-7px) rotate(-45deg); }
+
+        /* Fullscreen overlay menu */
+        .menu-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            display: none;
+            pointer-events: none;
+        }
+        body.menu-open .menu-overlay { display: block; pointer-events: auto; }
+        .menu-overlay .bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(1200px 600px at 20% -10%, rgba(255,255,255,0.08), transparent 60%),
+                        radial-gradient(1200px 600px at 120% 110%, rgba(0,255,255,0.10), transparent 60%),
+                        rgba(10,10,40,0.95);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-top: 1px solid rgba(0,255,255,0.15);
+        }
+        .menu-overlay .slices {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .menu-overlay .slice {
+            position: absolute;
+            width: 180%;
+            height: 28%;
+            left: -40%;
+            background: white;
+            transform: rotate(-45deg);
+            opacity: 0.04;
+            transition: transform 0.6s cubic-bezier(.55,0,.1,1);
+        }
+        .menu-overlay .slice.top { top: -25%; transform: rotate(-45deg) translateY(-120%); }
+        .menu-overlay .slice.mid { top: 32%; transform: rotate(-45deg) scaleY(0); }
+        .menu-overlay .slice.bot { top: 105%; transform: rotate(-45deg) translateY(20%); }
+        body.menu-open .menu-overlay .slice.top { transform: rotate(-45deg) translateY(-10%); }
+        body.menu-open .menu-overlay .slice.mid { transform: rotate(-45deg) scaleY(1); }
+        body.menu-open .menu-overlay .slice.bot { transform: rotate(-45deg) translateY(-105%); }
+        .menu-overlay .menu {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-overlay ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+        .menu-overlay li { margin: 14px 0; }
+        .menu-overlay a {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--dark-space);
+            text-decoration: none;
+            display: inline-block;
+            padding: 10px 16px;
+            background: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            border-radius: 32px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            box-shadow: 0 0 12px rgba(0,255,255,0.35);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .menu-overlay a:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0,255,255,0.55); }
+
+        /* Scroll lock when menu is open */
+        body.menu-open { overflow: hidden; }
+        
+        .hero {
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+        
+        .hero h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: var(--neon-green);
+        }
+        
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--accent-purple), var(--neon-blue));
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1.1rem;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .cta-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+            transform: translateY(-3px);
+        }
+        
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            padding: 40px 20px;
+        }
+        
+        .feature-card {
+            background: rgba(20, 20, 50, 0.7);
+            border-radius: 20px;
+            width: 280px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--neon-blue);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.3);
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            z-index: -1;
+            background: linear-gradient(45deg, var(--neon-blue), var(--accent-purple), var(--neon-green));
+            background-size: 200%;
+            border-radius: 22px;
+            animation: borderGlow 3s linear infinite;
+        }
+        
+        @keyframes borderGlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--neon-green);
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin: 40px 0 30px;
+            color: var(--accent-purple);
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--accent-purple));
+            border-radius: 3px;
+        }
+        
+        .program-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+        }
+        
+        .program-card {
+            background: rgba(20, 20, 50, 0.7);
+            border-radius: 15px;
+            width: 280px;
+            padding: 25px;
+            border: 1px solid var(--neon-pink);
+            transition: all 0.3s;
+        }
+        
+        .program-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(255, 0, 255, 0.3);
+        }
+        
+        .program-card h3 {
+            color: var(--neon-pink);
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        
+        .program-card ul {
+            padding-left: 20px;
+        }
+        
+        .program-card li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .program-card li::before {
+            content: '▹';
+            color: var(--neon-green);
+            position: absolute;
+            left: -20px;
+        }
+        
+        .pricing-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+        }
+        
+        .pricing-card {
+            background: rgba(20, 20, 50, 0.7);
+            border-radius: 15px;
+            width: 280px;
+            padding: 25px;
+            border: 1px solid var(--neon-pink);
+            transition: all 0.3s;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(255, 0, 255, 0.3);
+        }
+        
+        .pricing-card h3 {
+            color: var(--neon-pink);
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        
+        .price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--neon-green);
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .pricing-features {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        
+        .pricing-features li {
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+        
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--neon-green);
+            margin-right: 10px;
+        }
+        
+        .schedule-table {
+            width: 90%;
+            max-width: 900px;
+            margin: 30px auto;
+            border-collapse: collapse;
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .schedule-table th, .schedule-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .schedule-table th {
+            background-color: rgba(0, 255, 255, 0.2);
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .schedule-table tr:hover {
+            background-color: rgba(0, 255, 255, 0.1);
+        }
+        
+        .form-container {
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 40px auto;
+            border: 1px solid var(--neon-green);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--neon-blue);
+        }
+        
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 95%;
+            padding: 13px;
+            border-radius: 8px;
+            border: 1px solid var(--neon-blue);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+			
+        }
+        
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(45deg, var(--neon-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: block;
+            margin: 30px auto 0;
+            width: 200px;
+            text-align: center;
+        }
+        
+        .submit-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+            transform: translateY(-3px);
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        
+        .contact-card {
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            width: 290px;
+            border: 1px solid var(--neon-pink);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+        }
+        .contact-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--neon-blue);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.3);
+            background: rgba(10, 30, 60, 0.85);
+        }
+        .contact-link { color: var(--neon-blue); text-decoration: none; transition: color 0.3s ease, text-shadow 0.3s ease; }
+        .contact-link:hover { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+        
+        .contact-card h3 {
+            color: var(--neon-pink);
+            margin-top: 0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            color: var(--neon-blue);
+        }
+        .social-icon svg { width: 22px; height: 22px; fill: currentColor; }
+        
+        .social-icon:hover { transform: rotate(20deg) scale(1.2); }
+        .social-icon.yt:hover { background: #FF0000; color: #ffffff; }
+        .social-icon.ig:hover { 
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+            color: #ffffff;
+        }
+        .social-icon.tt:hover { background: #000000; color: #25F4EE; }
+        .social-icon.fb:hover { background: #1877F2; color: #ffffff; }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .footer-links a {
+            color: var(--neon-blue);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--neon-green);
+            text-decoration: underline;
+        }
+        .msg-success { color: var(--neon-green); text-align: center; margin-top: 12px; }
+        .msg-error { color: #ff8aa0; text-align: center; margin-top: 12px; }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 1.8rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .nav-btn { padding: 6px 12px; font-size: 0.8rem; }
+            /* Hide desktop nav, show hamburger */
+            .main-nav { display: none; }
+            .menu-trigger { display: inline-flex; }
+            
+            .pricing-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .schedule-table {
+                font-size: 0.9rem;
+            }
+            
+            .schedule-table th, .schedule-table td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+<meta property="og:title" content="MDIHUB Kids - Future Coders Academy" data-id="th-modified"><meta name="description" content="ka" data-id="th-modified"><meta property="og:description" content="ka" data-id="th-modified"><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified"><meta property="og:url" content="https://mihubkrai.tiiny.site/" data-id="th-modified"><meta property="og:type" content="website" data-id="th-modified"><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script><script defer data-domain="mihubkrai.tiiny.site" src="https://analytics.tiiny.site/js/plausible.js"></script></head>
+<body><div style="position: fixed !important; bottom: 0% !important; left: 0% !important; right: 0% !important; width: 100% !important; height: 55px !important; z-index: 9999 !important;"><a href="https://tiiny.host?ref=free-site">
+    <div style="padding: 10px !important; height: 55px; text-align: center; background: rgb(220,137,232) !important; background: linear-gradient(141deg, rgba(220,137,232,1) 0%, rgba(144,64,204,1) 100%) !important;">
+      <img style="height: 35px !important; width: auto !important;" src="https://tiiny.host/assets/img/ad.png" alt="tiiny.host">
+    </div>
+  </a></div>
+    <div class="stars" id="stars-container"><div class="star" style="width: 2.24871px; height: 2.24871px; left: 35.8089%; top: 23.4327%; animation-delay: 0.807983s;"></div><div class="star" style="width: 1.83188px; height: 1.83188px; left: 58.9605%; top: 2.91078%; animation-delay: 1.09232s;"></div><div class="star" style="width: 1.13718px; height: 1.13718px; left: 13.921%; top: 1.17628%; animation-delay: 1.30712s;"></div><div class="star" style="width: 2.75744px; height: 2.75744px; left: 60.0479%; top: 79.9673%; animation-delay: 0.709335s;"></div><div class="star" style="width: 0.556017px; height: 0.556017px; left: 86.6533%; top: 6.81751%; animation-delay: 0.899701s;"></div><div class="star" style="width: 0.949037px; height: 0.949037px; left: 26.2312%; top: 36.0303%; animation-delay: 0.92689s;"></div><div class="star" style="width: 2.8345px; height: 2.8345px; left: 75.3621%; top: 86.3493%; animation-delay: 1.28039s;"></div><div class="star" style="width: 0.0114364px; height: 0.0114364px; left: 84.824%; top: 36.5247%; animation-delay: 1.00152s;"></div><div class="star" style="width: 2.39903px; height: 2.39903px; left: 1.06434%; top: 27.1546%; animation-delay: 0.329984s;"></div><div class="star" style="width: 0.880548px; height: 0.880548px; left: 38.7767%; top: 88.5582%; animation-delay: 0.0655912s;"></div><div class="star" style="width: 0.585979px; height: 0.585979px; left: 51.8575%; top: 32.3357%; animation-delay: 1.32969s;"></div><div class="star" style="width: 1.48631px; height: 1.48631px; left: 27.8249%; top: 9.15227%; animation-delay: 0.270174s;"></div><div class="star" style="width: 0.0784113px; height: 0.0784113px; left: 78.1778%; top: 96.1467%; animation-delay: 1.73591s;"></div><div class="star" style="width: 0.689257px; height: 0.689257px; left: 23.8789%; top: 71.2116%; animation-delay: 1.71265s;"></div><div class="star" style="width: 2.94682px; height: 2.94682px; left: 28.3315%; top: 24.3072%; animation-delay: 1.11319s;"></div><div class="star" style="width: 1.94937px; height: 1.94937px; left: 71.6397%; top: 19.6089%; animation-delay: 0.0642711s;"></div><div class="star" style="width: 2.05361px; height: 2.05361px; left: 62.5343%; top: 53.8271%; animation-delay: 0.916231s;"></div><div class="star" style="width: 1.48299px; height: 1.48299px; left: 26.4145%; top: 86.4077%; animation-delay: 0.934693s;"></div><div class="star" style="width: 2.52531px; height: 2.52531px; left: 32.184%; top: 77.5116%; animation-delay: 1.66574s;"></div><div class="star" style="width: 2.82375px; height: 2.82375px; left: 50.5749%; top: 97.9816%; animation-delay: 0.723151s;"></div><div class="star" style="width: 2.89061px; height: 2.89061px; left: 46.6798%; top: 39.6256%; animation-delay: 0.945151s;"></div><div class="star" style="width: 1.50963px; height: 1.50963px; left: 88.4642%; top: 38.0354%; animation-delay: 1.01737s;"></div><div class="star" style="width: 2.62123px; height: 2.62123px; left: 85.0391%; top: 45.676%; animation-delay: 1.57765s;"></div><div class="star" style="width: 0.963528px; height: 0.963528px; left: 19.5394%; top: 92.9202%; animation-delay: 0.745915s;"></div><div class="star" style="width: 1.6861px; height: 1.6861px; left: 71.1307%; top: 81.8904%; animation-delay: 0.816088s;"></div><div class="star" style="width: 0.612848px; height: 0.612848px; left: 2.53086%; top: 42.4945%; animation-delay: 1.58135s;"></div><div class="star" style="width: 2.67693px; height: 2.67693px; left: 44.6903%; top: 92.6488%; animation-delay: 0.163727s;"></div><div class="star" style="width: 1.2658px; height: 1.2658px; left: 72.1471%; top: 25.2374%; animation-delay: 1.60165s;"></div><div class="star" style="width: 2.07691px; height: 2.07691px; left: 72.5986%; top: 94.7499%; animation-delay: 1.87423s;"></div><div class="star" style="width: 1.27042px; height: 1.27042px; left: 54.5364%; top: 17.2574%; animation-delay: 0.476966s;"></div><div class="star" style="width: 1.85444px; height: 1.85444px; left: 14.5415%; top: 68.2174%; animation-delay: 1.87103s;"></div><div class="star" style="width: 1.09765px; height: 1.09765px; left: 37.1868%; top: 40.8438%; animation-delay: 1.85518s;"></div><div class="star" style="width: 1.30802px; height: 1.30802px; left: 1.94353%; top: 85.9643%; animation-delay: 1.23074s;"></div><div class="star" style="width: 0.912686px; height: 0.912686px; left: 90.2589%; top: 35.9686%; animation-delay: 0.365352s;"></div><div class="star" style="width: 2.32385px; height: 2.32385px; left: 19.4014%; top: 52.7347%; animation-delay: 0.312429s;"></div><div class="star" style="width: 2.73017px; height: 2.73017px; left: 66.9932%; top: 75.7908%; animation-delay: 0.0567823s;"></div><div class="star" style="width: 1.8605px; height: 1.8605px; left: 96.747%; top: 16.8083%; animation-delay: 1.35299s;"></div><div class="star" style="width: 0.388412px; height: 0.388412px; left: 25.8309%; top: 55.1295%; animation-delay: 0.0765483s;"></div><div class="star" style="width: 2.8279px; height: 2.8279px; left: 74.5867%; top: 68.1901%; animation-delay: 1.11625s;"></div><div class="star" style="width: 0.427259px; height: 0.427259px; left: 84.8668%; top: 43.5661%; animation-delay: 1.98533s;"></div><div class="star" style="width: 0.0957328px; height: 0.0957328px; left: 28.0507%; top: 89.1867%; animation-delay: 0.819774s;"></div><div class="star" style="width: 0.681642px; height: 0.681642px; left: 89.5783%; top: 37.1992%; animation-delay: 0.149006s;"></div><div class="star" style="width: 0.320242px; height: 0.320242px; left: 2.25642%; top: 53.8923%; animation-delay: 1.5102s;"></div><div class="star" style="width: 1.96453px; height: 1.96453px; left: 72.3509%; top: 99.609%; animation-delay: 1.97125s;"></div><div class="star" style="width: 1.04817px; height: 1.04817px; left: 52.9411%; top: 73.4639%; animation-delay: 1.47552s;"></div><div class="star" style="width: 1.35986px; height: 1.35986px; left: 57.9174%; top: 82.5439%; animation-delay: 0.0263969s;"></div><div class="star" style="width: 1.1067px; height: 1.1067px; left: 96.4566%; top: 46.31%; animation-delay: 1.54297s;"></div><div class="star" style="width: 1.92491px; height: 1.92491px; left: 68.5262%; top: 1.95262%; animation-delay: 1.91361s;"></div><div class="star" style="width: 1.7408px; height: 1.7408px; left: 4.2465%; top: 93.1958%; animation-delay: 1.16144s;"></div><div class="star" style="width: 2.40361px; height: 2.40361px; left: 40.488%; top: 6.60034%; animation-delay: 1.53935s;"></div><div class="star" style="width: 0.256229px; height: 0.256229px; left: 8.94242%; top: 64.4491%; animation-delay: 1.73892s;"></div><div class="star" style="width: 0.0198359px; height: 0.0198359px; left: 50.3257%; top: 91.9298%; animation-delay: 1.49434s;"></div><div class="star" style="width: 0.439798px; height: 0.439798px; left: 10.0995%; top: 42.5344%; animation-delay: 1.24146s;"></div><div class="star" style="width: 2.86863px; height: 2.86863px; left: 73.1564%; top: 60.1428%; animation-delay: 1.21392s;"></div><div class="star" style="width: 0.366544px; height: 0.366544px; left: 65.199%; top: 53.2772%; animation-delay: 1.23434s;"></div><div class="star" style="width: 2.12358px; height: 2.12358px; left: 96.4981%; top: 98.4385%; animation-delay: 1.58339s;"></div><div class="star" style="width: 0.155437px; height: 0.155437px; left: 8.1823%; top: 38.5792%; animation-delay: 1.68709s;"></div><div class="star" style="width: 1.94733px; height: 1.94733px; left: 85.5286%; top: 88.1683%; animation-delay: 1.12773s;"></div><div class="star" style="width: 0.0481465px; height: 0.0481465px; left: 75.1263%; top: 32.8639%; animation-delay: 0.546277s;"></div><div class="star" style="width: 2.41076px; height: 2.41076px; left: 87.7596%; top: 6.88604%; animation-delay: 0.312899s;"></div><div class="star" style="width: 0.699623px; height: 0.699623px; left: 60.6741%; top: 62.6527%; animation-delay: 1.07892s;"></div><div class="star" style="width: 1.29351px; height: 1.29351px; left: 46.5892%; top: 56.1917%; animation-delay: 1.14358s;"></div><div class="star" style="width: 2.83078px; height: 2.83078px; left: 97.4934%; top: 36.9368%; animation-delay: 1.35106s;"></div><div class="star" style="width: 0.64017px; height: 0.64017px; left: 80.0077%; top: 92.4452%; animation-delay: 1.95505s;"></div><div class="star" style="width: 2.67107px; height: 2.67107px; left: 52.4352%; top: 58.6744%; animation-delay: 0.489417s;"></div><div class="star" style="width: 1.80645px; height: 1.80645px; left: 82.9506%; top: 45.3%; animation-delay: 0.647688s;"></div><div class="star" style="width: 2.81385px; height: 2.81385px; left: 88.8863%; top: 33.5538%; animation-delay: 0.889444s;"></div><div class="star" style="width: 0.855858px; height: 0.855858px; left: 69.8202%; top: 67.6836%; animation-delay: 1.67992s;"></div><div class="star" style="width: 1.90697px; height: 1.90697px; left: 31.0766%; top: 83.8417%; animation-delay: 0.299292s;"></div><div class="star" style="width: 2.18273px; height: 2.18273px; left: 51.4856%; top: 33.8958%; animation-delay: 1.58208s;"></div><div class="star" style="width: 0.0648892px; height: 0.0648892px; left: 82.4573%; top: 8.85516%; animation-delay: 0.798643s;"></div><div class="star" style="width: 1.36845px; height: 1.36845px; left: 1.11771%; top: 4.73207%; animation-delay: 1.7934s;"></div><div class="star" style="width: 0.69339px; height: 0.69339px; left: 86.5926%; top: 46.5985%; animation-delay: 0.578546s;"></div><div class="star" style="width: 1.62947px; height: 1.62947px; left: 63.1162%; top: 72.1646%; animation-delay: 1.65262s;"></div><div class="star" style="width: 0.508807px; height: 0.508807px; left: 8.38977%; top: 75.8276%; animation-delay: 1.77324s;"></div><div class="star" style="width: 1.81889px; height: 1.81889px; left: 28.304%; top: 9.44888%; animation-delay: 1.27623s;"></div><div class="star" style="width: 1.21647px; height: 1.21647px; left: 35.4322%; top: 82.1573%; animation-delay: 1.06359s;"></div><div class="star" style="width: 0.90439px; height: 0.90439px; left: 64.9957%; top: 13.6728%; animation-delay: 0.9712s;"></div><div class="star" style="width: 1.93469px; height: 1.93469px; left: 74.0783%; top: 40.1401%; animation-delay: 0.979998s;"></div><div class="star" style="width: 0.228745px; height: 0.228745px; left: 3.68389%; top: 91.6674%; animation-delay: 0.646121s;"></div><div class="star" style="width: 2.11294px; height: 2.11294px; left: 71.7021%; top: 13.8706%; animation-delay: 0.116732s;"></div><div class="star" style="width: 2.92949px; height: 2.92949px; left: 98.3831%; top: 88.9675%; animation-delay: 0.407673s;"></div><div class="star" style="width: 2.50785px; height: 2.50785px; left: 95.8563%; top: 43.5757%; animation-delay: 0.192695s;"></div><div class="star" style="width: 1.9309px; height: 1.9309px; left: 75.2691%; top: 3.65263%; animation-delay: 0.277975s;"></div><div class="star" style="width: 1.84471px; height: 1.84471px; left: 4.16328%; top: 46.6048%; animation-delay: 0.0103246s;"></div><div class="star" style="width: 1.80055px; height: 1.80055px; left: 0.58226%; top: 31.6595%; animation-delay: 0.231781s;"></div><div class="star" style="width: 2.71742px; height: 2.71742px; left: 77.3572%; top: 35.0763%; animation-delay: 0.0107628s;"></div><div class="star" style="width: 0.42779px; height: 0.42779px; left: 40.8005%; top: 97.7575%; animation-delay: 0.922173s;"></div><div class="star" style="width: 0.901987px; height: 0.901987px; left: 1.98426%; top: 51.9607%; animation-delay: 0.125121s;"></div><div class="star" style="width: 0.702025px; height: 0.702025px; left: 40.315%; top: 50.8896%; animation-delay: 1.72113s;"></div><div class="star" style="width: 2.46205px; height: 2.46205px; left: 29.1271%; top: 69.6609%; animation-delay: 0.418376s;"></div><div class="star" style="width: 0.166641px; height: 0.166641px; left: 71.4207%; top: 29.1314%; animation-delay: 0.126463s;"></div><div class="star" style="width: 2.33691px; height: 2.33691px; left: 51.7572%; top: 31.9286%; animation-delay: 1.64836s;"></div><div class="star" style="width: 1.89587px; height: 1.89587px; left: 24.9455%; top: 46.1356%; animation-delay: 1.79998s;"></div><div class="star" style="width: 2.28352px; height: 2.28352px; left: 72.621%; top: 30.851%; animation-delay: 1.38426s;"></div><div class="star" style="width: 2.86661px; height: 2.86661px; left: 76.1241%; top: 67.6429%; animation-delay: 1.66964s;"></div><div class="star" style="width: 0.846623px; height: 0.846623px; left: 13.3087%; top: 20.9016%; animation-delay: 0.789682s;"></div><div class="star" style="width: 0.969635px; height: 0.969635px; left: 11.8657%; top: 80.833%; animation-delay: 1.48533s;"></div><div class="star" style="width: 1.58881px; height: 1.58881px; left: 85.8988%; top: 46.6942%; animation-delay: 0.702683s;"></div><div class="star" style="width: 0.742617px; height: 0.742617px; left: 35.2787%; top: 58.8374%; animation-delay: 0.0885775s;"></div><div class="star" style="width: 2.50248px; height: 2.50248px; left: 42.7381%; top: 55.6349%; animation-delay: 1.86087s;"></div><div class="star" style="width: 0.157622px; height: 0.157622px; left: 87.8333%; top: 95.4813%; animation-delay: 0.931338s;"></div><div class="star" style="width: 0.510138px; height: 0.510138px; left: 83.9467%; top: 98.027%; animation-delay: 0.283921s;"></div><div class="star" style="width: 1.21006px; height: 1.21006px; left: 92.582%; top: 6.55631%; animation-delay: 1.38998s;"></div><div class="star" style="width: 2.3762px; height: 2.3762px; left: 85.0315%; top: 44.5235%; animation-delay: 1.31932s;"></div><div class="star" style="width: 1.39867px; height: 1.39867px; left: 82.4633%; top: 71.7693%; animation-delay: 1.72256s;"></div><div class="star" style="width: 1.05576px; height: 1.05576px; left: 3.69446%; top: 42.8945%; animation-delay: 0.551335s;"></div><div class="star" style="width: 1.7698px; height: 1.7698px; left: 71.5889%; top: 8.83207%; animation-delay: 0.581344s;"></div><div class="star" style="width: 0.146188px; height: 0.146188px; left: 84.2541%; top: 7.78065%; animation-delay: 0.643787s;"></div><div class="star" style="width: 2.00972px; height: 2.00972px; left: 56.0243%; top: 46.2503%; animation-delay: 0.277711s;"></div><div class="star" style="width: 1.2626px; height: 1.2626px; left: 12.8953%; top: 53.9396%; animation-delay: 0.22305s;"></div><div class="star" style="width: 2.88859px; height: 2.88859px; left: 13.7742%; top: 79.6635%; animation-delay: 0.647871s;"></div><div class="star" style="width: 2.95236px; height: 2.95236px; left: 90.6438%; top: 68.0524%; animation-delay: 1.19579s;"></div><div class="star" style="width: 2.41875px; height: 2.41875px; left: 12.1512%; top: 96.357%; animation-delay: 1.31376s;"></div><div class="star" style="width: 2.80314px; height: 2.80314px; left: 41.9823%; top: 4.65143%; animation-delay: 0.266772s;"></div><div class="star" style="width: 0.713195px; height: 0.713195px; left: 60.6981%; top: 25.0947%; animation-delay: 1.95188s;"></div><div class="star" style="width: 1.12559px; height: 1.12559px; left: 32.6964%; top: 95.9855%; animation-delay: 0.750395s;"></div><div class="star" style="width: 1.01933px; height: 1.01933px; left: 24.5698%; top: 62.067%; animation-delay: 0.0616464s;"></div><div class="star" style="width: 0.356361px; height: 0.356361px; left: 39.4517%; top: 8.90465%; animation-delay: 1.93875s;"></div><div class="star" style="width: 2.50699px; height: 2.50699px; left: 12.4276%; top: 12.7052%; animation-delay: 0.0251517s;"></div><div class="star" style="width: 2.89723px; height: 2.89723px; left: 44.3621%; top: 21.211%; animation-delay: 0.643658s;"></div><div class="star" style="width: 2.44747px; height: 2.44747px; left: 12.5486%; top: 62.0363%; animation-delay: 1.92183s;"></div><div class="star" style="width: 0.711512px; height: 0.711512px; left: 90.7678%; top: 12.6858%; animation-delay: 0.356275s;"></div><div class="star" style="width: 1.17526px; height: 1.17526px; left: 36.6515%; top: 41.888%; animation-delay: 0.310112s;"></div><div class="star" style="width: 1.83641px; height: 1.83641px; left: 72.5893%; top: 33.9004%; animation-delay: 1.90255s;"></div><div class="star" style="width: 2.12676px; height: 2.12676px; left: 56.4479%; top: 66.5164%; animation-delay: 1.25965s;"></div><div class="star" style="width: 2.91685px; height: 2.91685px; left: 23.0681%; top: 1.12549%; animation-delay: 0.86712s;"></div><div class="star" style="width: 2.86571px; height: 2.86571px; left: 78.1785%; top: 38.7298%; animation-delay: 1.56944s;"></div><div class="star" style="width: 2.30612px; height: 2.30612px; left: 20.0189%; top: 73.3368%; animation-delay: 0.730303s;"></div><div class="star" style="width: 1.76868px; height: 1.76868px; left: 84.0041%; top: 60.861%; animation-delay: 0.409364s;"></div><div class="star" style="width: 2.60907px; height: 2.60907px; left: 35.9069%; top: 79.8909%; animation-delay: 0.810973s;"></div><div class="star" style="width: 1.50387px; height: 1.50387px; left: 48.3959%; top: 13.3126%; animation-delay: 1.77371s;"></div><div class="star" style="width: 0.783595px; height: 0.783595px; left: 38.2368%; top: 82.4657%; animation-delay: 1.26795s;"></div><div class="star" style="width: 2.25047px; height: 2.25047px; left: 94.3588%; top: 28.4396%; animation-delay: 0.0242845s;"></div><div class="star" style="width: 1.1729px; height: 1.1729px; left: 92.7916%; top: 31.1276%; animation-delay: 0.856869s;"></div><div class="star" style="width: 1.50318px; height: 1.50318px; left: 84.1485%; top: 3.92592%; animation-delay: 0.226214s;"></div><div class="star" style="width: 0.506621px; height: 0.506621px; left: 94.5282%; top: 47.922%; animation-delay: 1.77885s;"></div><div class="star" style="width: 0.876167px; height: 0.876167px; left: 10.1281%; top: 97.0577%; animation-delay: 0.149694s;"></div><div class="star" style="width: 2.67815px; height: 2.67815px; left: 48.5327%; top: 14.0582%; animation-delay: 1.20493s;"></div><div class="star" style="width: 2.26662px; height: 2.26662px; left: 55.942%; top: 69.5517%; animation-delay: 0.282458s;"></div><div class="star" style="width: 1.03905px; height: 1.03905px; left: 34.6859%; top: 21.7532%; animation-delay: 1.99s;"></div><div class="star" style="width: 2.81619px; height: 2.81619px; left: 18.0627%; top: 41.5011%; animation-delay: 0.405488s;"></div><div class="star" style="width: 0.141196px; height: 0.141196px; left: 7.60114%; top: 20.8945%; animation-delay: 0.340498s;"></div><div class="star" style="width: 1.32617px; height: 1.32617px; left: 69.2516%; top: 31.4156%; animation-delay: 1.47835s;"></div><div class="star" style="width: 2.98026px; height: 2.98026px; left: 59.3919%; top: 97.2062%; animation-delay: 1.20862s;"></div><div class="star" style="width: 2.88488px; height: 2.88488px; left: 63.3488%; top: 11.0134%; animation-delay: 1.07187s;"></div><div class="star" style="width: 2.3459px; height: 2.3459px; left: 12.0485%; top: 18.652%; animation-delay: 0.218372s;"></div><div class="star" style="width: 2.47508px; height: 2.47508px; left: 66.2041%; top: 10.0189%; animation-delay: 1.87659s;"></div><div class="star" style="width: 1.37367px; height: 1.37367px; left: 97.1455%; top: 20.2823%; animation-delay: 0.875031s;"></div><div class="star" style="width: 2.57442px; height: 2.57442px; left: 83.9963%; top: 30.4452%; animation-delay: 0.739102s;"></div><div class="star" style="width: 2.95361px; height: 2.95361px; left: 86.0874%; top: 76.7784%; animation-delay: 1.06999s;"></div><div class="star" style="width: 0.638615px; height: 0.638615px; left: 7.34227%; top: 42.0504%; animation-delay: 1.73638s;"></div><div class="star" style="width: 1.02779px; height: 1.02779px; left: 20.0878%; top: 22.2656%; animation-delay: 1.19612s;"></div><div class="star" style="width: 1.78234px; height: 1.78234px; left: 93.0977%; top: 3.48623%; animation-delay: 1.3978s;"></div><div class="star" style="width: 0.0580873px; height: 0.0580873px; left: 78.2752%; top: 19.222%; animation-delay: 1.24506s;"></div><div class="star" style="width: 0.807538px; height: 0.807538px; left: 2.6695%; top: 85.4124%; animation-delay: 0.820763s;"></div><div class="star" style="width: 0.0500474px; height: 0.0500474px; left: 43.2226%; top: 62.4154%; animation-delay: 1.67029s;"></div><div class="star" style="width: 2.29268px; height: 2.29268px; left: 16.0935%; top: 39.4975%; animation-delay: 0.259468s;"></div><div class="star" style="width: 0.746729px; height: 0.746729px; left: 28.4822%; top: 95.5499%; animation-delay: 0.529837s;"></div><div class="star" style="width: 0.805244px; height: 0.805244px; left: 62.306%; top: 16.2821%; animation-delay: 0.067785s;"></div><div class="star" style="width: 2.98421px; height: 2.98421px; left: 89.056%; top: 13.3621%; animation-delay: 1.16849s;"></div><div class="star" style="width: 0.851136px; height: 0.851136px; left: 12.4429%; top: 84.3526%; animation-delay: 1.47633s;"></div><div class="star" style="width: 0.717541px; height: 0.717541px; left: 34.007%; top: 17.5448%; animation-delay: 1.04172s;"></div><div class="star" style="width: 0.662483px; height: 0.662483px; left: 36.0037%; top: 54.2548%; animation-delay: 0.261567s;"></div><div class="star" style="width: 1.29376px; height: 1.29376px; left: 68.2978%; top: 9.0499%; animation-delay: 0.526118s;"></div><div class="star" style="width: 2.31829px; height: 2.31829px; left: 68.9213%; top: 65.9416%; animation-delay: 1.15716s;"></div><div class="star" style="width: 0.624505px; height: 0.624505px; left: 69.2021%; top: 4.9462%; animation-delay: 1.582s;"></div><div class="star" style="width: 2.65119px; height: 2.65119px; left: 17.777%; top: 55.9509%; animation-delay: 0.362116s;"></div><div class="star" style="width: 2.07141px; height: 2.07141px; left: 60.3469%; top: 43.2542%; animation-delay: 1.23494s;"></div><div class="star" style="width: 2.16454px; height: 2.16454px; left: 95.8293%; top: 48.8011%; animation-delay: 0.141465s;"></div><div class="star" style="width: 1.09111px; height: 1.09111px; left: 71.8091%; top: 95.0179%; animation-delay: 1.3529s;"></div><div class="star" style="width: 0.867566px; height: 0.867566px; left: 64.0048%; top: 50.9991%; animation-delay: 1.79787s;"></div><div class="star" style="width: 2.23742px; height: 2.23742px; left: 76.3448%; top: 57.562%; animation-delay: 1.59441s;"></div><div class="star" style="width: 1.24146px; height: 1.24146px; left: 53.688%; top: 33.5%; animation-delay: 1.80196s;"></div><div class="star" style="width: 1.34475px; height: 1.34475px; left: 51.0492%; top: 64.9996%; animation-delay: 0.7598s;"></div><div class="star" style="width: 0.111669px; height: 0.111669px; left: 40.3632%; top: 58.9873%; animation-delay: 0.118364s;"></div><div class="star" style="width: 2.15908px; height: 2.15908px; left: 27.2809%; top: 76.7121%; animation-delay: 1.94373s;"></div><div class="star" style="width: 1.94431px; height: 1.94431px; left: 57.7279%; top: 20.8244%; animation-delay: 1.281s;"></div><div class="star" style="width: 1.77839px; height: 1.77839px; left: 86.1857%; top: 8.42955%; animation-delay: 1.50084s;"></div><div class="star" style="width: 2.48726px; height: 2.48726px; left: 97.4901%; top: 89.8809%; animation-delay: 0.844859s;"></div><div class="star" style="width: 1.71993px; height: 1.71993px; left: 21.8186%; top: 79.7176%; animation-delay: 1.95781s;"></div><div class="star" style="width: 1.30833px; height: 1.30833px; left: 29.1632%; top: 29.553%; animation-delay: 1.37282s;"></div><div class="star" style="width: 0.954242px; height: 0.954242px; left: 54.0658%; top: 74.5387%; animation-delay: 0.687018s;"></div><div class="star" style="width: 1.37311px; height: 1.37311px; left: 78.9229%; top: 65.3997%; animation-delay: 1.84267s;"></div><div class="star" style="width: 1.13809px; height: 1.13809px; left: 57.0605%; top: 7.43497%; animation-delay: 1.37778s;"></div><div class="star" style="width: 2.00814px; height: 2.00814px; left: 44.4105%; top: 38.3233%; animation-delay: 0.690838s;"></div><div class="star" style="width: 0.937041px; height: 0.937041px; left: 63.8661%; top: 31.8746%; animation-delay: 1.95077s;"></div><div class="star" style="width: 0.187665px; height: 0.187665px; left: 88.7526%; top: 28.7012%; animation-delay: 1.54805s;"></div><div class="star" style="width: 2.18963px; height: 2.18963px; left: 33.0441%; top: 47.3088%; animation-delay: 1.11808s;"></div><div class="star" style="width: 0.449319px; height: 0.449319px; left: 7.04945%; top: 13.1219%; animation-delay: 0.370451s;"></div><div class="star" style="width: 2.50945px; height: 2.50945px; left: 67.8183%; top: 25.4487%; animation-delay: 1.45343s;"></div><div class="star" style="width: 1.24048px; height: 1.24048px; left: 88.681%; top: 7.98023%; animation-delay: 1.60454s;"></div><div class="star" style="width: 0.702386px; height: 0.702386px; left: 31.3083%; top: 85.1132%; animation-delay: 0.0624353s;"></div><div class="star" style="width: 0.640939px; height: 0.640939px; left: 49.2614%; top: 16.8064%; animation-delay: 1.27081s;"></div><div class="star" style="width: 0.896349px; height: 0.896349px; left: 91.2151%; top: 76.0879%; animation-delay: 0.741338s;"></div><div class="star" style="width: 1.65695px; height: 1.65695px; left: 96.959%; top: 73.4067%; animation-delay: 1.72543s;"></div><div class="star" style="width: 2.46684px; height: 2.46684px; left: 22.0693%; top: 39.3958%; animation-delay: 1.81038s;"></div><div class="star" style="width: 1.39698px; height: 1.39698px; left: 44.7278%; top: 59.7788%; animation-delay: 1.60767s;"></div><div class="star" style="width: 1.11144px; height: 1.11144px; left: 19.7127%; top: 36.5886%; animation-delay: 0.659799s;"></div><div class="star" style="width: 0.965976px; height: 0.965976px; left: 55.2199%; top: 99.1655%; animation-delay: 0.651727s;"></div></div>
+    <canvas id="constellation" aria-hidden="true" width="1882" height="918" style="width: 1506px; height: 735px;"></canvas>
+    
+    <header>
+        
+      <h1 class="logo">MIHUB<span class="">KRAI</span></h1>
+        <p class="">Empowering Young Minds Through Coding</p>
+        
+        <nav class="main-nav">
+            <ul>
+                <li><a class="nav-link" href="#home">Home</a></li>
+                <li><a class="nav-link" href="#about">About</a></li>
+                <li><a class="nav-link" href="#why-us">Why Us</a></li>
+                <li><a class="nav-link" href="#programs">Programs</a></li>
+                <li><a class="nav-link" href="#resources">Resources</a></li>
+                <li><a class="nav-link" href="#pricing">Pricing</a></li>
+                <li><a class="nav-link" href="#schedule">Schedule</a></li>
+                <li><a class="nav-link" href="#register">Register</a></li>
+                <li><a class="nav-link" href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+        <button class="menu-trigger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+            <span class="bar"></span>
+        </button>
+    </header>
+    <div class="menu-overlay" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation Menu">
+        <div class="bg"></div>
+        <div class="slices">
+            <i class="slice top"></i>
+            <i class="slice mid"></i>
+            <i class="slice bot"></i>
+        </div>
+        <div class="menu">
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#why-us">Why Us</a></li>
+                <li><a href="#programs">Programs</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#schedule">Schedule</a></li>
+                <li><a href="#register">Register</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+ 
+    <section class="hero" id="home">
+        <h2>Join MDIHUB Kids Coding Academy</h2>
+        <p>Give your child a head start in the digital world. Our fun, hands-on program teaches essential tech skills to children aged 5-14 in Mahikeng.</p>
+        
+        <a href="#register" class="cta-btn">REGISTER NOW</a>
+        <a href="#programs" class="cta-btn">LEARN MORE</a>
+    </section>
+    <h3><p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="">Launch Day : To Be Announced</p></h3>
+    <h3><p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="  ablefocused">Time: To Be Announced</p></h3>
+    <h3><p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="">Venue: 2696 James Watt Crescent, Mafikeng Industrial, Mahikeng, 2745</p></h3>
+
+    <h2 class="section-title" id="about">Why Choose Our Academy?</h2>
+    <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="">We're bridging the digital gap in Mahikeng by providing accessible, engaging tech education for children.</p>
+    
+    <section class="features" id="why-us">
+        <div class="feature-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <div class="feature-icon">👐</div>
+            <h3>Hands-On Learning</h3>
+            <p>Kids learn by doing with real coding projects and robotics kits, not just watching or listening.</p>
+        </div>
+        
+        <div class="feature-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <div class="feature-icon">📊</div>
+            <h3>Age-Appropriate</h3>
+            <p>Specialized tracks for different age groups ensure each child learns at the right pace.</p>
+        </div>
+        
+        <div class="feature-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <div class="feature-icon">🏆</div>
+            <h3 class="">Competition Ready</h3>
+            <p class="">We prepare students for local and international coding and robotics competitions.</p>
+        </div>
+        
+        <div class="feature-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <div class="feature-icon">🌍</div>
+            <h3 class="">Community Focus</h3>
+            <p class="">Regular showcase events let students present their work to family and the community.</p>
+        </div>
+    </section>
+    
+    <h2 class="section-title" id="programs">Our Programs</h2>
+    <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="">We offer age-appropriate coding and robotics programs designed to spark creativity and build confidence.</p>
+    
+    <div class="program-cards">
+        <div class="program-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <h3>Ages 5-9: Beginner Coding &amp; Robotics</h3>
+            <ul>
+                <li>Introduction to computer basics</li>
+                <li>ScratchJr/Scratch animations</li>
+                <li>LEGO WeDo robotics through fun, interactive projects</li>
+                <li>Unplugged coding activities</li>
+            </ul>
+        </div>
+        
+        <div class="program-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <h3>Ages 10-14: Advanced Coding &amp; Robotics</h3>
+            <ul>
+                <li>Game development</li>
+                <li>Physical computing</li>
+                <li>Python basics</li>
+                <li>Competition preparation</li>
+            </ul>
+        </div>
+        
+        <div class="program-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <h3 class="">All Ages: Competitions &amp; Showcases</h3>
+            <ul>
+                <li class="">FIRST LEGO League</li>
+                <li class="">Africa Code Week</li>
+                <li class="">World Robot Olympiad</li>
+                <li class="">Termly showcase events</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2 class="section-title" id="resources">Resources</h2>
+    <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;">Helpful tools and guides for students and parents to keep learning at home.</p>
+    
+    <section class="features">
+        <div class="feature-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <div class="feature-icon">🧑‍💻</div>
+            <h3>Student Tools</h3>
+            <p>Practice coding and explore robotics with these free, child-friendly platforms.</p>
+            <ul style="text-align: left; font-size: 0.9rem;">
+                <li>Scratch (Block coding)</li>
+                <li>Code.org Courses</li>
+                <li>MakeCode for micro:bit</li>
+                <li>Tinkercad Circuits</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <div class="feature-icon">👪</div>
+            <h3>For Parents</h3>
+            <p>Guides to support your child's learning journey and stay informed.</p>
+            <ul style="text-align: left; font-size: 0.9rem;">
+                <li>Academy Handbook (PDF)</li>
+                <li>Term Calendar</li>
+                <li>Safety &amp; Device Setup Tips</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <div class="feature-icon">📥</div>
+            <h3 class="">Downloads</h3>
+            <p class="">Printable sheets and starter files used in class.</p>
+            <ul style="text-align: left; font-size: 0.9rem;">
+                <li class="">Scratch Starter Project</li>
+                <li>Arduino Blink Sketch</li>
+                <li class="">Parent Consent Form</li>
+            </ul>
+        </div>
+    </section>
+    
+    <h2 class="section-title" id="pricing">Ages 5-9 Pricing</h2>
+    <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="">Non-refundable Registration Fee Is R100 </p>
+    
+    <div class="pricing-cards">
+        <div class="pricing-card">
+            <h3>Full Term Payment</h3>
+            <div class="price">R1,000/term</div>
+            <p style="text-align: center; font-size: 0.9rem;">Pay upfront and save R200</p>
+            <ul class="pricing-features">
+                <li>3 classes per week</li>
+                <li>Dedicated equipment</li>
+                <li>Advanced projects</li>
+                <li>Priority support</li>
+                <li>Showcase participation</li>
+                <li>Competition eligibility</li>
+
+            </ul>
+            <a href="#register" class="cta-btn" style="width: 80%; margin: 0; text-align: center; display: block;">Get Started</a>
+        </div>
+        
+        <div class="pricing-card">
+            <h3>Instalment Plan</h3>
+            <div class="price">R1,200/term</div>
+            <p style="text-align: center; font-size: 0.9rem;">3 monthly payments of R400</p>
+            <ul class="pricing-features">
+                <li>3 classes per week</li>
+                <li>Dedicated equipment</li>
+                <li>Advanced projects</li>
+                <li>Priority support</li>
+                <li>Showcase participation</li>
+                <li>Competition eligibility</li>
+    
+            </ul>
+            <a href="#register" class="cta-btn" style="width: 80%; margin: 0; text-align: center; display: block;">Get Started</a>
+        </div>
+        
+        <div class="pricing-card">
+            <h3 class="">Sibling Discount</h3>
+            <div class="price">R900/term</div>
+            <p style="text-align: center; font-size: 0.9rem;">For 2nd child and subsequent siblings</p>
+            <ul class="pricing-features">
+                <li class="">25% off regular price</li>
+                <li>All Standard benefits</li>
+                <li class="">Shared equipment</li>
+                <li>Family learning environment</li>
+                <li class="">Joint projects</li>
+                <li>3 payments of R300 each</li>
+            </ul>
+            <a href="#register" class="cta-btn" style="width: 80%; margin: 0; text-align: center; display: block;">Get Started</a>
+        </div>
+    </div>
+
+<h2 class="section-title" id="pricing">Ages 10-14 Pricing</h2>
+    <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="">Non-refundable Registration Fee Is R200</p>
+    
+    <div class="pricing-cards">
+        <div class="pricing-card">
+            <h3>Full Term Payment</h3>
+            <div class="price">R1,200/term</div>
+            <p style="text-align: center; font-size: 0.9rem;">Pay upfront and save R300</p>
+            <ul class="pricing-features">
+                <li>3 classes per week</li>
+                <li>Dedicated equipment</li>
+                <li>Advanced projects</li>
+                <li>Priority support</li>
+                <li>Showcase participation</li>
+                <li>Competition eligibility</li>
+
+            </ul>
+            <a href="#register" class="cta-btn" style="width: 80%; margin: 0; text-align: center; display: block;">Get Started</a>
+        </div>
+        
+        <div class="pricing-card">
+            <h3>Instalment Plan</h3>
+            <div class="price">R1,500/term</div>
+            <p style="text-align: center; font-size: 0.9rem;">3 monthly payments of R500</p>
+            <ul class="pricing-features">
+                <li>3 classes per week</li>
+                <li>Dedicated equipment</li>
+                <li>Advanced projects</li>
+                <li>Priority support</li>
+                <li>Showcase participation</li>
+                <li>Competition eligibility</li>
+            </ul>
+            <a href="#register" class="cta-btn" style="width: 80%; margin: 0; text-align: center; display: block;">Get Started</a>
+        </div>
+        
+        <div class="pricing-card">
+            <h3 class="">Sibling Discount</h3>
+            <div class="price">R1125/term</div>
+            <p style="text-align: center; font-size: 0.9rem;" class="">For 2nd child and subsequent siblings</p>
+            <ul class="pricing-features">
+                <li class="">25% off regular price</li>
+                <li>All Standard benefits</li>
+                <li class="">Shared equipment</li>
+                <li class="">Family learning environment</li>
+                <li class="">Joint projects</li>
+                <li class="">3 payments of R375 each</li>
+            </ul>
+            <a href="#register" class="cta-btn" style="width: 80%; margin: 0; text-align: center; display: block;">Get Started</a>
+        </div>
+    </div>
+
+    
+    <h2 class="section-title" id="faq">FAQ</h2>
+    <div class="program-cards" style="padding-top: 0;">
+        <div class="program-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <h3>What ages do you accept?</h3>
+            <ul>
+                <li>Our core programs are designed for ages 5–14.</li>
+                <li>Competitions and showcases are open to all enrolled students.</li>
+            </ul>
+        </div>
+        <div class="program-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <h3>Do kids need prior experience?</h3>
+            <ul>
+                <li>No. We start from basics and group by experience level.</li>
+                <li>Advanced tracks are available for returning learners.</li>
+            </ul>
+        </div>
+        <div class="program-card" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+            <h3 class="">What equipment is required?</h3>
+            <ul>
+                <li class="">We provide devices and robotics kits for classes.</li>
+                <li>Home practice uses free, child‑friendly platforms.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2 class="section-title" id="schedule">Program Schedule</h2>
+    <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="">Our structured curriculum runs in 2 terms throughout 6 months with classes three times a week.</p>
+    
+    <table class="schedule-table">
+        <thead>
+            <tr>
+                <th>Term</th>
+                <th>Dates</th>
+                <th>Theme</th>
+                <th class="">Focus Areas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Term 1 - (Phase 1) </td>
+                <td> To Be Announced</td>
+                <td>Getting Started with Code</td>
+                <td class="">Computer Basics, Scratch basics, LEGO WeDo, TinkerCAD intro</td>
+            </tr>
+            <tr>
+                <td>Term 1 - (Phase 2)</td>
+                <td> To Be Announced</td>
+                <td>From Code to Robots</td>
+                <td class="">Advanced Scratch, LEGO Spike Prime, Arduino</td>
+            </tr>
+            <tr>
+                <td>Term 2 - (Phase 1)</td>
+                <td> To Be Announced</td>
+                <td>Real-World Problem Solvers</td>
+                <td class="">Python basics, Arduino, robotics challenges</td>
+            </tr>
+            <tr>
+                <td>Term 2 - (Phase 2)</td>
+                <td> To Be Announced</td>
+                <td>Show What You Can Do!</td>
+                <td class="">Final projects, competitions, showcase prep</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <p style="text-align: center; font-size: 0.9rem; margin-top: -15px;">&nbsp;</p>
+    <p style="text-align: center; font-size: 0.9rem; margin-top: -15px;" class=""> Class Days: Monday, Tuesday, Thursday (90 minutes each)</p>
+<p style="text-align: center; font-size: 0.9rem; margin-top: -15px;" class=""><br>
+Locations: MDiHub </p>
+<h2 class="section-title" id="register">Register Your Child</h2>
+    <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="">Secure your child's spot in our upcoming term. Limited spaces available.</p>
+    
+    <form id="registrationForm" class="form-container" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+        <div class="form-group">
+            <label for="parent-name" class="">Parent/Guardian Name</label>
+            <input type="text" id="parent-name" required="">
+        </div>
+        
+        <div class="form-group">
+            <label for="email" class="">Email Address</label>
+            <input type="email" id="email" required="">
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" required="">
+        </div>
+        
+        <div class="form-group">
+            <label for="child-name" class="">Child's Name</label>
+            <input type="text" id="child-name" required="">
+        </div>
+        
+        <div class="form-group">
+            <label for="child-age">Child's Age</label>
+            <input type="number" id="child-age" min="5" max="14" required="">
+        </div>
+
+        <div class="form-group">
+            <label for="program">Program Interest</label>
+            <select id="program" required="">
+                <option value="">Select a program</option>
+                <option value="5-9">Ages 5-9: Beginner Coding &amp; Robotics</option>
+                <option value="10-14">Ages 10-14: Advanced Coding &amp; Robotics</option>
+
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="location" class="">Preferred Location</label>
+            <select id="location" required="">
+                <option value="">Select location</option>
+                <option value="mdihub">MDiHub 
+				</option>
+              
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="notes" class="">Additional Notes</label>
+            <textarea id="notes"></textarea>
+        </div>
+        
+        <button type="submit" class="submit-btn">Submit Registration</button>
+        <div class="msg-success" id="successMsg"></div>
+        <div class="msg-error" id="errorMsg"></div>
+    </form>
+    
+    <h2 class="section-title" id="contact">Get In Touch</h2>
+    <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="">Have questions? We're here to help you find the right program for your child.</p>
+    
+    <div class="contact-info">
+        <div class="contact-card">
+            <h3>Our Location</h3>
+            <p>Mafikeng Digital Innovation Hub</p>
+          <p><br>
+              <a href="https://www.google.com/maps/search/?api=1&amp;query=2696%20James%20Watt%20Cres%2C%20Industrial%20Site%2C%20Mahikeng%2C%20North%20West%20Province%2C%20South%20Africa" target="_blank" rel="noopener" class="contact-link">2696 James Watt Cres, Industrial Site<br>
+              Mahikeng, North West Province, South Africa</a></p>
+           
+			<h3>Email Us</h3>
+			<p><a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=info@mafihub.co.za" target="_blank" rel="noopener" class="contact-link">info@mafihub.co.za</a></p>
+			<h3 style="margin-top: 20px;">Call Us</h3>
+            <p><a href="https://wa.me/27659581632" target="_blank" rel="noopener" class="contact-link">+27 65 958 1632</a></p>
+<h3> Open</h3>
+<p>Monday,Tuesday &amp; Thursday: 3:30pm-5pm</p>
+<p>&nbsp;</p>
+			
+        </div>
+        
+      
+        
+        <div class="contact-card">
+            <h3 class="">Enquiries
+            
+            </h3>
+            <form id="contactForm">
+                <div class="form-group">
+                    <input type="text" id="contact-name" placeholder="Your Name" style="margin-bottom: 10px;" required="">
+                </div>
+                <div class="form-group">
+                    <input type="email" id="contact-email" placeholder="Email Address" style="margin-bottom: 10px;" required="">
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="contact-phone" placeholder="Phone Number" style="margin-bottom: 10px;" required="">
+                </div>
+                <div class="form-group">
+                    <select id="contact-subject" style="margin-bottom: 10px;" title="Message subject" required="">
+                        <option value="">Select a subject</option>
+                        <option value="Program Inquiry">Program Inquiry</option>
+                        <option value="Registration Help">Registration Help</option>
+                        <option value="General Question">General Question</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <textarea id="contact-message" placeholder="Your Message" style="height: 80px;" required=""></textarea>
+                </div>
+                <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Send Message</button>
+                <div class="msg-success" id="contactSuccess"></div>
+                <div class="msg-error" id="contactError"></div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <h3 style="margin-bottom: 10px; color: var(--neon-blue);" class="">MIHUB KRAI</h3>
+        <p class="">Empowering young minds in Mahikeng through coding and robotics education since 2025.</p>
+        <div class="footer-links">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#why-us">Why Us</a>
+            <a href="#programs">Programs</a>
+            <a href="#resources" class="">Resources</a>
+            <a href="#pricing" class="">Pricing</a>
+            <a href="#schedule">Schedule</a>
+            <a href="#register" class="">Register</a>
+            <a href="#faq">FAQ</a>
+            <a href="#contact" class="">Contact</a>
+        </div>
+        <div class="social-icons">
+            <a class="social-icon yt" href="https://youtube.com/@mihubmih?si=fwWQmFTdsSf1gI1R" target="_blank" rel="noopener" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3.03 3.03 0 0 0-2.13-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.37.56A3.03 3.03 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3.03 3.03 0 0 0 2.13 2.14C4.5 20.5 12 20.5 12 20.5s7.5 0 9.37-.56A3.03 3.03 0 0 0 23.5 17.8 31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8zM9.75 15.5v-7l6 3.5-6 3.5z"></path></svg>
+            </a>
+            <a class="social-icon ig" href="https://www.instagram.com/mdi_hub/profilecard/?igsh=MXg0aXZsbTg1MWczOA==" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5zm0 2A3.5 3.5 0 1 0 15.5 13 3.5 3.5 0 0 0 12 9.5zm6.25-3.25a1.25 1.25 0 1 1-1.25 1.25 1.25 1.25 0 0 1 1.25-1.25z"></path></svg>
+            </a>
+            <a class="social-icon tt" href="https://tiktok.com/@mdihub" target="_blank" rel="noopener" aria-label="TikTok">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8.5c-2.5 0-4.7-1.4-5.8-3.5V16a5.5 5.5 0 1 1-5.5-5.5c.3 0 .7 0 1 .1V13a3 3 0 1 0 3 3V2h3a6.5 6.5 0 0 0 4.3 4.3V8.5z"></path></svg>
+            </a>
+            <a class="social-icon fb" href="https://www.facebook.com/Mafihub" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.3V12h2.3V9.8c0-2.3 1.3-3.6 3.4-3.6.99 0 2.03.18 2.03.18v2.23h-1.14c-1.12 0-1.47.7-1.47 1.42V12h2.5l-.4 2.9h-2.1v7A10 10 0 0 0 22 12z"></path></svg>
+            </a>
+        </div>
+        <p class="">© 2025 MIHUB KIDS RIBITICS &amp; AI Academy. All Rights Reserved.</p>
+    </footer>
+
+     <script>
+        // Create stars background
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = `${Math.random() * 3}px`;
+                star.style.height = star.style.width;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                container.appendChild(star);
+            }
+        }
+
+        // Constellation background
+        function createConstellation() {
+            const canvas = document.getElementById('constellation');
+            if (!canvas) return;
+
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReduced) {
+                // Keep canvas empty for users who prefer reduced motion
+                return () => {};
+            }
+
+            const ctx = canvas.getContext('2d');
+            const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+            let width = 0;
+            let height = 0;
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = Math.floor(width * dpr);
+                canvas.height = Math.floor(height * dpr);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const baseDensity = (width * height) / 18000; // tuned for visuals
+            const isSmall = width < 768;
+            const count = Math.min(200, Math.max(40, Math.floor(baseDensity * (isSmall ? 0.6 : 1))));
+
+            const themeBlue = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim() || '#0ff0fc';
+            const themePurple = getComputedStyle(document.documentElement).getPropertyValue('--accent-purple').trim() || '#b57edc';
+
+            const particles = [];
+            function rand(min, max) { return Math.random() * (max - min) + min; }
+
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: rand(0, width),
+                    y: rand(0, height),
+                    vx: rand(-0.3, 0.3),
+                    vy: rand(-0.3, 0.3),
+                    r: rand(0.6, 1.8)
+                });
+            }
+
+            const mouse = { x: width / 2, y: height / 2, active: false };
+            window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
+            window.addEventListener('mouseout', () => { mouse.active = false; });
+
+            function step() {
+                ctx.clearRect(0, 0, width, height);
+
+                // Update and draw dots
+                ctx.fillStyle = themeBlue;
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+
+                    // gentle mouse attraction
+                    if (mouse.active) {
+                        const dx = mouse.x - p.x;
+                        const dy = mouse.y - p.y;
+                        const dist2 = dx * dx + dy * dy;
+                        if (dist2 < 16000) { // 126px radius
+                            p.vx += dx * 0.000005;
+                            p.vy += dy * 0.000005;
+                        }
+                    }
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    // bounce on edges
+                    if (p.x < 0 || p.x > width) p.vx *= -1;
+                    if (p.y < 0 || p.y > height) p.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Connect lines
+                const maxDist = isSmall ? 90 : 130;
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const a = particles[i];
+                        const b = particles[j];
+                        const dx = a.x - b.x;
+                        const dy = a.y - b.y;
+                        const d = Math.hypot(dx, dy);
+                        if (d < maxDist) {
+                            const t = 1 - d / maxDist;
+                            const alpha = 0.15 * t;
+                            ctx.strokeStyle = `rgba(11, 244, 252, ${alpha})`;
+                            ctx.lineWidth = Math.max(0.4, 1.2 * t);
+                            ctx.beginPath();
+                            ctx.moveTo(a.x, a.y);
+                            ctx.lineTo(b.x, b.y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                // subtle purple glow overlay
+                const grad = ctx.createRadialGradient(width*0.75, height*0.25, 0, width*0.75, height*0.25, Math.max(width, height)*0.9);
+                grad.addColorStop(0, themePurple + '11');
+                grad.addColorStop(1, '#00000000');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, width, height);
+
+                anim = requestAnimationFrame(step);
+            }
+
+            let anim = requestAnimationFrame(step);
+
+            // Return cleanup
+            return () => {
+                cancelAnimationFrame(anim);
+                window.removeEventListener('resize', resize);
+            };
+        }
+        
+        // Links use native anchor scrolling via CSS scroll-behavior
+
+        // Helpers for dedupe-safe inputs
+        function normalizeEmail(value) {
+            return (value || '').trim().toLowerCase();
+        }
+        function normalizePhone(value) {
+            // keep only digits; adapt if you want to preserve leading +
+            const digitsOnly = ((value || '').match(/\d+/g) || []).join('');
+            return digitsOnly;
+        }
+        
+        // Initialize everything when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            const cleanupConstellation = createConstellation();
+            
+            // Add animation to registration form when scrolled to
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.form-container, .program-card, .feature-card').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all 0.5s ease-out';
+                observer.observe(el);
+            });
+
+            // Mobile menu toggle
+            const bodyEl = document.body;
+            const trigger = document.querySelector('.menu-trigger');
+            const overlay = document.getElementById('mobile-menu');
+            const overlayLinks = overlay ? overlay.querySelectorAll('a') : [];
+            const bg = overlay ? overlay.querySelector('.bg') : null;
+
+            function openMenu() {
+                bodyEl.classList.add('menu-open');
+                if (trigger) trigger.setAttribute('aria-expanded', 'true');
+            }
+            function closeMenu() {
+                bodyEl.classList.remove('menu-open');
+                if (trigger) trigger.setAttribute('aria-expanded', 'false');
+            }
+            function toggleMenu() {
+                if (bodyEl.classList.contains('menu-open')) closeMenu(); else openMenu();
+            }
+
+            if (trigger) {
+                trigger.addEventListener('click', toggleMenu);
+            }
+            if (bg) {
+                bg.addEventListener('click', closeMenu);
+            }
+            if (overlayLinks && overlayLinks.length) {
+                overlayLinks.forEach(link => link.addEventListener('click', closeMenu));
+            }
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeMenu();
+            });
+
+            // Supabase registration submit
+            const supabaseUrl = 'https://uctrpljdpysxbimctzjc.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjdHJwbGpkcHlzeGJpbWN0empjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMjkzMDMsImV4cCI6MjA3MTcwNTMwM30.9xCUnoVmH8atCR_Ji89isOb_tzUeZ04zouRb8i8feRA';
+            const sb = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
+            const regForm = document.getElementById('registrationForm');
+            const successMsg = document.getElementById('successMsg');
+            const errorMsg = document.getElementById('errorMsg');
+            if (sb && regForm) {
+                regForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (successMsg) successMsg.textContent = '';
+                    if (errorMsg) errorMsg.textContent = '';
+
+                    const payload = {
+                        parent_name: (document.getElementById('parent-name') || {}).value || '',
+                        email: normalizeEmail((document.getElementById('email') || {}).value || ''),
+                        phone: normalizePhone((document.getElementById('phone') || {}).value || ''),
+                        child_name: (document.getElementById('child-name') || {}).value || '',
+                        child_age: parseInt((document.getElementById('child-age') || {}).value || '0', 10),
+                        program_interest: (document.getElementById('program') || {}).value || '',
+                        preferred_location: (document.getElementById('location') || {}).value || '',
+                        notes: (document.getElementById('notes') || {}).value || ''
+                    };
+
+                    try {
+                        // Insert only; database unique constraint blocks duplicates
+                        const { error } = await sb.from('registrations').insert([payload]);
+                        if (error) throw error;
+                        if (successMsg) successMsg.textContent = 'Registration submitted successfully!';
+                        regForm.reset();
+                    } catch (err) {
+                        const msg = (err && err.code === '23505')
+                            ? 'A registration with this email/phone already exists.'
+                            : (err && err.message) ? `Error: ${err.message}` : 'Error submitting registration. Please try again.';
+                        if (errorMsg) errorMsg.textContent = msg;
+                        // eslint-disable-next-line no-console
+                        console.error(err);
+                    }
+                });
+            }
+
+            // Supabase contact form submit
+            const contactForm = document.getElementById('contactForm');
+            const contactSuccess = document.getElementById('contactSuccess');
+            const contactError = document.getElementById('contactError');
+            if (sb && contactForm) {
+                contactForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (contactSuccess) contactSuccess.textContent = '';
+                    if (contactError) contactError.textContent = '';
+
+                    const messagePayload = {
+                        name: (document.getElementById('contact-name') || {}).value || '',
+                        email: normalizeEmail((document.getElementById('contact-email') || {}).value || ''),
+                        phone: normalizePhone((document.getElementById('contact-phone') || {}).value || ''),
+                        subject: (document.getElementById('contact-subject') || {}).value || '',
+                        message: (document.getElementById('contact-message') || {}).value || ''
+                    };
+
+                    try {
+                        const { error } = await sb.from('contact_messages').insert([messagePayload]);
+                        if (error) throw error;
+                        if (contactSuccess) contactSuccess.textContent = 'Message sent! We will get back to you soon.';
+                        contactForm.reset();
+                    } catch (err) {
+                        const msg = (err && err.code === '23505')
+                            ? 'A message from this email already exists.'
+                            : (err && err.message) ? `Error: ${err.message}` : 'Error sending message. Please try again.';
+                        if (contactError) contactError.textContent = msg;
+                        // eslint-disable-next-line no-console
+                        console.error(err);
+                    }
+                });
+            }
+        });
+    </script>
+
+
+<div style="height: 55px !important;"></div></body></html>
